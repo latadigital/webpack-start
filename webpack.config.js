@@ -4,24 +4,31 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const BeautifyHtmlWebpackPlugin = require('beautify-html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
-const latagroup = false;
-const devMode =
-  latagroup ||
-  process.argv[process.argv.indexOf('--mode') + 1] ===
-    'development';
+// Path en donde están las vistas en PUG
+const views_path = './src/pug';
 
-const landings = ['index', 'productos'];
+// Listado de paginas Pug que se renderizarán a HTML
+const landings = [
+  {
+    filename: 'index',
+    template: `${views_path}/index.pug`
+  },
+  {
+    filename: 'productos',
+    template: `${views_path}/productos.pug`
+  }
+];
 
 const HTML = {
   test: /.pug$/,
   use: [
     {
-      loader: 'html-loader',
+      loader: 'html-loader'
     },
     {
-      loader: 'pug-html-loader',
-    },
-  ],
+      loader: 'pug-html-loader'
+    }
+  ]
 };
 
 const CSS = {
@@ -29,8 +36,8 @@ const CSS = {
   use: [
     MiniCssExtractPlugin.loader,
     'css-loader',
-    'sass-loader',
-  ],
+    'sass-loader'
+  ]
 };
 
 const JS = {
@@ -39,9 +46,9 @@ const JS = {
   use: {
     loader: 'babel-loader',
     options: {
-      presets: ['@babel/preset-env'],
-    },
-  },
+      presets: ['@babel/preset-env']
+    }
+  }
 };
 
 const config = () => {
@@ -51,26 +58,29 @@ const config = () => {
       filename: 'main.js',
       publicPath: '/',
       path: path.resolve(__dirname, 'build'),
-      clean: true,
+      clean: true
     },
     devServer: {
-      open: true,
+      open: true
     },
     module: {
-      rules: [HTML, CSS, JS],
+      rules: [HTML, CSS, JS]
     },
     plugins: [
       ...landings.map(
-        (x) =>
+        ({ filename, template }) =>
           new HtmlWebpackPlugin({
-            filename: `${x}.html`,
-            template: `./src/pug/${x}.pug`,
+            filename: `${filename}.html`,
+            template,
             inject: 'body',
+            minify: false
           })
       ),
-      new MiniCssExtractPlugin(),
-      new BeautifyHtmlWebpackPlugin(),
-    ],
+      new MiniCssExtractPlugin({
+        filename: '[name].[fullhash].css'
+      }),
+      new BeautifyHtmlWebpackPlugin()
+    ]
   };
 };
 module.exports = (env, arvg) => config(arvg.mode);
